@@ -1,0 +1,4 @@
+gui.mcitemstats.durability=Прочность: %1$d/%2$d
+gui.mcitemstats.protection=Очки защиты: %1$d
+gui.mcitemstats.harvestlevel=Уровень добычи: %1$d (%2$s)
+gui.mcitemstats.harvestspeed=Скорость добычи: %1$d (%2$s)

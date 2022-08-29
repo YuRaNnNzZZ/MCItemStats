@@ -1,0 +1,16 @@
+[
+{
+  "modid": "mcitemstats",
+  "name": "MCItemStats",
+  "description": "Shows various stats for items.",
+  "version": "${version}",
+  "mcversion": "${mcversion}",
+  "url": "",
+  "updateUrl": "",
+  "authorList": ["YuRaNnNzZZ"],
+  "credits": "",
+  "logoFile": "",
+  "screenshots": [],
+  "dependencies": []
+}
+]
