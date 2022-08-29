@@ -23,6 +23,7 @@ public class ItemTooltipEventHandler {
         toolClasses.put("pickaxe", Blocks.stone);
         toolClasses.put("shovel", Blocks.dirt);
         toolClasses.put("axe", Blocks.log);
+        toolClasses.put("sickle", Blocks.leaves);
     }
 
     @SubscribeEvent(priority = EventPriority.HIGHEST)
