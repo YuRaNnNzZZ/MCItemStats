@@ -1,6 +1,5 @@
 package ru.yurannnzzz.mcitemstats.events;
 
-import cpw.mods.fml.common.ObfuscationReflectionHelper;
 import cpw.mods.fml.common.eventhandler.EventPriority;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.relauncher.Side;
@@ -20,11 +19,11 @@ import java.util.Map;
 
 @SideOnly(Side.CLIENT)
 public class ItemTooltipEventHandler {
-    private final Map<ItemFood, PotionEffect> potionEffectCache = new HashMap<ItemFood, PotionEffect>();
+    private final Map<ItemFood, PotionEffect> potionEffectCache = new HashMap<>();
     private final Map<String, Block> toolClasses;
 
     public ItemTooltipEventHandler() {
-        toolClasses = new HashMap<String, Block>();
+        toolClasses = new HashMap<>();
         toolClasses.put("pickaxe", Blocks.stone);
         toolClasses.put("shovel", Blocks.dirt);
         toolClasses.put("axe", Blocks.log);
@@ -84,15 +83,9 @@ public class ItemTooltipEventHandler {
                 }
             }
 
-            int potionId = ObfuscationReflectionHelper.getPrivateValue(ItemFood.class, food, "potionId");
-            float potionEffectProbability = ObfuscationReflectionHelper.getPrivateValue(ItemFood.class, food, "potionEffectProbability");
-
-            if (potionId > 0 && potionEffectProbability > 0.0F) {
+            if (food.potionId > 0 && food.potionEffectProbability > 0.0F) {
                 if (!potionEffectCache.containsKey(food)) {
-                    int potionDuration = ObfuscationReflectionHelper.getPrivateValue(ItemFood.class, food, "potionDuration");
-                    int potionAmplifier = ObfuscationReflectionHelper.getPrivateValue(ItemFood.class, food, "potionAmplifier");
-
-                    potionEffectCache.put(food, new PotionEffect(potionId, potionDuration * 20, potionAmplifier));
+                    potionEffectCache.put(food, new PotionEffect(food.potionId, food.potionDuration * 20, food.potionAmplifier));
                 }
 
                 PotionEffect potionEffect = potionEffectCache.get(food);
@@ -102,7 +95,7 @@ public class ItemTooltipEventHandler {
                     potionName = potionName + " " + StatCollector.translateToLocal("potion.potency." + potionEffect.getAmplifier()).trim();
                 }
 
-                event.toolTip.add((Potion.potionTypes[potionEffect.getPotionID()].isBadEffect() ? EnumChatFormatting.RED : EnumChatFormatting.AQUA) + StatCollector.translateToLocalFormatted("gui.mcitemstats.food.potion", potionName, Potion.getDurationString(potionEffect), Math.round(potionEffectProbability * 100.0F)));
+                event.toolTip.add((Potion.potionTypes[food.potionId].isBadEffect() ? EnumChatFormatting.RED : EnumChatFormatting.AQUA) + StatCollector.translateToLocalFormatted("gui.mcitemstats.food.potion", potionName, Potion.getDurationString(potionEffect), Math.round(food.potionEffectProbability * 100.0F)));
             }
         }
 
