@@ -1,4 +1,9 @@
 gui.mcitemstats.durability=Durability: %1$d/%2$d
-gui.mcitemstats.protection=Armor Protection: %1$d
+gui.mcitemstats.protection=Armor Protection: %d
+
 gui.mcitemstats.harvestlevel=Harvest Level: %1$d (%2$s)
 gui.mcitemstats.harvestspeed=Harvest Speed: %1$d (%2$s)
+
+gui.mcitemstats.food.heal=Food: %d
+gui.mcitemstats.food.saturation=Saturation: %d
+gui.mcitemstats.food.potion=%1$s (%2$s, %3$d%%)
