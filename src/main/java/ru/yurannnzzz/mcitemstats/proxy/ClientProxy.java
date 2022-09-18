@@ -1,5 +1,6 @@
 package ru.yurannnzzz.mcitemstats.proxy;
 
+import cpw.mods.fml.common.Loader;
 import cpw.mods.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.common.MinecraftForge;
 import ru.yurannnzzz.mcitemstats.events.ItemTooltipEventHandler;
@@ -10,5 +11,9 @@ public class ClientProxy extends CommonProxy {
         super.init(event);
 
         MinecraftForge.EVENT_BUS.register(new ItemTooltipEventHandler());
+
+        if (Loader.isModLoaded("Baubles")) {
+            ItemTooltipEventHandler.baublesLoaded = true;
+        }
     }
 }

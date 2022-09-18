@@ -13,6 +13,7 @@ import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.StatCollector;
 import net.minecraftforge.client.event.GuiOpenEvent;
 import net.minecraftforge.event.entity.player.ItemTooltipEvent;
+import ru.yurannnzzz.mcitemstats.util.BaublesUtil;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -21,6 +22,8 @@ import java.util.Map;
 public class ItemTooltipEventHandler {
     private final Map<ItemFood, PotionEffect> potionEffectCache = new HashMap<>();
     private final Map<String, Block> toolClasses;
+
+    public static boolean baublesLoaded = false;
 
     public ItemTooltipEventHandler() {
         toolClasses = new HashMap<>();
@@ -57,15 +60,14 @@ public class ItemTooltipEventHandler {
             }
         }
 
-        if (item instanceof ItemTool) {
-            ItemTool tool = (ItemTool) item;
+        for (String toolClass : item.getToolClasses(stack)) {
+            int harvestLevel = item.getHarvestLevel(stack, toolClass);
+            if (harvestLevel < 0) continue;
 
-            for (String toolClass : tool.getToolClasses(stack)) {
-                event.toolTip.add(EnumChatFormatting.DARK_GREEN + StatCollector.translateToLocalFormatted("gui.mcitemstats.harvestlevel", tool.getHarvestLevel(stack, toolClass), toolClass));
+            event.toolTip.add(EnumChatFormatting.DARK_GREEN + StatCollector.translateToLocalFormatted("gui.mcitemstats.harvestlevel", harvestLevel, toolClass));
 
-                if (toolClasses.containsKey(toolClass)) {
-                    event.toolTip.add(EnumChatFormatting.DARK_GREEN + StatCollector.translateToLocalFormatted("gui.mcitemstats.harvestspeed", tool.getDigSpeed(stack, toolClasses.get(toolClass), 0), toolClass));
-                }
+            if (toolClasses.containsKey(toolClass)) {
+                event.toolTip.add(EnumChatFormatting.DARK_GREEN + StatCollector.translateToLocalFormatted("gui.mcitemstats.harvestspeed", item.getDigSpeed(stack, toolClasses.get(toolClass), 0), toolClass));
             }
         }
 
@@ -96,6 +98,14 @@ public class ItemTooltipEventHandler {
                 }
 
                 event.toolTip.add((Potion.potionTypes[food.potionId].isBadEffect() ? EnumChatFormatting.RED : EnumChatFormatting.AQUA) + StatCollector.translateToLocalFormatted("gui.mcitemstats.food.potion", potionName, Potion.getDurationString(potionEffect), Math.round(food.potionEffectProbability * 100.0F)));
+            }
+        }
+
+        if (baublesLoaded && BaublesUtil.isBauble(stack)) {
+            String baubleSlot = BaublesUtil.getBaubleType(stack);
+
+            if (baubleSlot != null) {
+                event.toolTip.add(EnumChatFormatting.GOLD + StatCollector.translateToLocalFormatted("gui.mcitemstats.bauble.slot", StatCollector.translateToLocal("gui.mcitemstats.bauble.type." + baubleSlot.toLowerCase())));
             }
         }
 
