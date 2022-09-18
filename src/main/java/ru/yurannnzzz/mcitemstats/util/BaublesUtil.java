@@ -1,5 +1,6 @@
 package ru.yurannnzzz.mcitemstats.util;
 
+import baubles.api.BaubleType;
 import baubles.api.IBauble;
 import net.minecraft.item.ItemStack;
 
@@ -9,7 +10,11 @@ public class BaublesUtil {
     @Nullable
     public static String getBaubleType(ItemStack stack) {
         if (stack != null && stack.getItem() instanceof IBauble) {
-            return ((IBauble) stack.getItem()).getBaubleType(stack).name();
+            BaubleType type = ((IBauble) stack.getItem()).getBaubleType(stack);
+
+            if (type != null) {
+                return type.name();
+            }
         }
 
         return null;
