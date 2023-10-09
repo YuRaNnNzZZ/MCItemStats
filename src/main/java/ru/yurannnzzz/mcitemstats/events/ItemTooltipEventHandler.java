@@ -69,7 +69,7 @@ public class ItemTooltipEventHandler {
                 tooltip.add("\u00A72" + LangUtils.format("gui.mcitemstats.food.heal", healAmount));
 
                 if (saturationModifier > 0.0f) {
-                    tooltip.add("\u00A76" + LangUtils.format("gui.mcitemstats.food.saturation", Math.round(healAmount * saturationModifier * 2f * 10f) / 10f));
+                    tooltip.add("\u00A76" + LangUtils.format("gui.mcitemstats.food.saturation", healAmount * saturationModifier * 2f));
                 }
             }
 
