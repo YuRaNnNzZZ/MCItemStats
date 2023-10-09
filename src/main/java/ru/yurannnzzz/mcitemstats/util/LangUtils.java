@@ -1,5 +1,6 @@
 package ru.yurannnzzz.mcitemstats.util;
 
+import cpw.mods.fml.common.FMLLog;
 import cpw.mods.fml.common.registry.LanguageRegistry;
 import net.minecraft.util.StringTranslate;
 import ru.yurannnzzz.mcitemstats.MCItemStatsMod;
@@ -14,6 +15,10 @@ public class LangUtils {
     private static final Logger LOGGER = Logger.getLogger(MCItemStatsMod.MODID);
     private static final LanguageRegistry registry = LanguageRegistry.instance();
 
+    static {
+        LOGGER.setParent(FMLLog.getLogger());
+    }
+
     public static void load(String path) {
         for (Object key : StringTranslate.getInstance().getLanguageList().keySet()) {
             String lang = (String) key;
@@ -27,8 +32,6 @@ public class LangUtils {
 
                 properties.load(new InputStreamReader(inputStream, Charset.forName("UTF-8")));
                 registry.addStringLocalization(properties, lang);
-
-                System.out.println("Loaded language for " + lang);
             } catch (Exception e) {
                 LOGGER.info("Unable to load language for " + lang + ": " + e.getMessage());
             } finally {

@@ -47,8 +47,6 @@ public class ItemStackTransformer implements IClassTransformer {
 
         for (MethodNode methodNode : (List<MethodNode>)classNode.methods) {
             if (methodNode.name.equals(methodName) && methodNode.desc.equals(methodDesc)) {
-                System.out.println("Found method");
-
                 for (int i = 0; i < methodNode.instructions.size(); i++) {
                     AbstractInsnNode node = methodNode.instructions.get(i);
 
