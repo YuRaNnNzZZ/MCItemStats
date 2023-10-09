@@ -1,0 +1,45 @@
+buildscript {
+	repositories {
+		mavenCentral()
+		maven { url 'https://maven.fabricmc.net' }
+		maven { url 'https://repo.sleeping.town' }
+	}
+	dependencies {
+		classpath 'agency.highlysuspect:voldeloom:2.4-SNAPSHOT'
+	}
+}
+
+apply plugin: 'agency.highlysuspect.voldeloom'
+
+java.toolchain.languageVersion = JavaLanguageVersion.of(11) //Last version able to set a --release as low as 6
+compileJava.options.release.set(6) //Forge doesn't understand classes compiled to versions of the class-file format newer than Java 6's
+
+group = project.group
+version = project.minecraft_version + '-' + project.version
+
+dependencies {
+	minecraft "com.mojang:minecraft:${project.minecraft_version}"
+	forge "net.minecraftforge:forge:${project.forge_version}:universal@zip"
+	mappings "net.minecraftforge:forge:${project.forge_version}:src@zip"
+	
+	accessTransformers files('src/main/resources/mcitemstats_at.cfg')
+}
+
+processResources {
+	inputs.property 'version', project.version
+	inputs.property 'mcversion', project.minecraft_version
+
+	filesMatching(['**/mcmod.info', '**/mods.toml']) {
+		expand 'version': project.version, 'mcversion':project.minecraft_version
+	}
+}
+
+tasks.jar.dependsOn(processResources)
+
+jar {
+	manifest {
+		attributes (
+			'FMLCorePlugin': 'ru.yurannnzzz.mcitemstats.MCItemStatsCoreMod'
+		)
+	}
+}
