@@ -1,54 +1,39 @@
 package ru.yurannnzzz.mcitemstats.events;
 
-import cpw.mods.fml.common.eventhandler.EventPriority;
-import cpw.mods.fml.common.eventhandler.SubscribeEvent;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
-import net.minecraft.block.Block;
-import net.minecraft.init.Blocks;
-import net.minecraft.item.*;
+import cpw.mods.fml.client.FMLClientHandler;
+import net.minecraft.client.gui.GuiScreen;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.EnumToolMaterial;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemArmor;
+import net.minecraft.item.ItemFood;
+import net.minecraft.item.ItemStack;
+import net.minecraft.item.ItemTool;
 import net.minecraft.potion.Potion;
 import net.minecraft.potion.PotionEffect;
-import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.StatCollector;
-import net.minecraftforge.client.event.GuiOpenEvent;
-import net.minecraftforge.event.entity.player.ItemTooltipEvent;
-import ru.yurannnzzz.mcitemstats.util.BaublesUtil;
+import ru.yurannnzzz.mcitemstats.util.LangUtils;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-@SideOnly(Side.CLIENT)
 public class ItemTooltipEventHandler {
-    private final Map<ItemFood, PotionEffect> potionEffectCache = new HashMap<>();
-    private final Map<String, Block> toolClasses;
+    private static final Map<ItemFood, PotionEffect> potionEffectCache = new HashMap<ItemFood, PotionEffect>();
+    private static GuiScreen lastGui = null;
 
-    public static boolean baublesLoaded = false;
-
-    public ItemTooltipEventHandler() {
-        toolClasses = new HashMap<>();
-        toolClasses.put("pickaxe", Blocks.stone);
-        toolClasses.put("shovel", Blocks.dirt);
-        toolClasses.put("axe", Blocks.log);
-        toolClasses.put("sickle", Blocks.leaves);
-    }
-
-    @SubscribeEvent(priority = EventPriority.HIGHEST)
-    public void handleItemTooltip(ItemTooltipEvent event) {
-        ItemStack stack = event.itemStack;
-        Item item = stack.getItem();
-
-        if (event.showAdvancedItemTooltips && stack.isItemDamaged()) {
-            String origDurabilityLine = "Durability: " + (stack.getMaxDamage() - stack.getItemDamageForDisplay()) + " / " + stack.getMaxDamage();
-
-            for (String line : event.toolTip) {
-                if (line.equals(origDurabilityLine)) {
-                    event.toolTip.remove(line);
+    public static void handleTooltip(ItemStack stack, EntityPlayer player, boolean advancedTooltips, ArrayList tooltip) {
+        /*if (advancedTooltips) {
+            for (Object line : tooltip) {
+                if (line.equals("Durability: " + (stack.getMaxDamage() - stack.getItemDamageForDisplay()) + " / " + stack.getMaxDamage())) {
+                    tooltip.remove(line);
 
                     break;
                 }
             }
-        }
+        }*/
+
+        Item item = stack.getItem();
 
         if (item instanceof ItemArmor) {
             ItemArmor armor = (ItemArmor) item;
@@ -56,36 +41,44 @@ public class ItemTooltipEventHandler {
             int reduction = armor.getArmorMaterial().getDamageReductionAmount(armor.armorType);
 
             if (reduction > 0) {
-                event.toolTip.add(EnumChatFormatting.AQUA + StatCollector.translateToLocalFormatted("gui.mcitemstats.protection", reduction));
+                tooltip.add("\u00A7b" + LangUtils.format("gui.mcitemstats.protection", reduction));
             }
         }
 
-        for (String toolClass : item.getToolClasses(stack)) {
-            int harvestLevel = item.getHarvestLevel(stack, toolClass);
-            if (harvestLevel < 0) continue;
+        int damage = item.getDamageVsEntity(null);
+        if (damage > 1) {
+            tooltip.add("\u00A73" + LangUtils.format("gui.mcitemstats.attackdamage", damage));
+        }
 
-            event.toolTip.add(EnumChatFormatting.DARK_GREEN + StatCollector.translateToLocalFormatted("gui.mcitemstats.harvestlevel", harvestLevel, toolClass));
+        if (item instanceof ItemTool) {
+            ItemTool tool = (ItemTool) item;
 
-            if (toolClasses.containsKey(toolClass)) {
-                event.toolTip.add(EnumChatFormatting.DARK_GREEN + StatCollector.translateToLocalFormatted("gui.mcitemstats.harvestspeed", item.getDigSpeed(stack, toolClasses.get(toolClass), 0), toolClass));
-            }
+            EnumToolMaterial material = EnumToolMaterial.valueOf(tool.getToolMaterialName());
+
+            tooltip.add("\u00A72" + LangUtils.format("gui.mcitemstats.harvestlevel", material.getHarvestLevel()));
+            tooltip.add("\u00A72" + LangUtils.format("gui.mcitemstats.harvestspeed", material.getEfficiencyOnProperMaterial()));
         }
 
         if (item instanceof ItemFood) {
             ItemFood food = (ItemFood) item;
 
-            int healAmount = food.func_150905_g(stack);
-            float saturationModifier = food.func_150906_h(stack);
+            int healAmount = food.getHealAmount();
+            float saturationModifier = food.getSaturationModifier();
 
             if (healAmount > 0) {
-                event.toolTip.add(EnumChatFormatting.DARK_GREEN + StatCollector.translateToLocalFormatted("gui.mcitemstats.food.heal", healAmount));
+                tooltip.add("\u00A72" + LangUtils.format("gui.mcitemstats.food.heal", healAmount));
 
-                if (saturationModifier > 0.0F) {
-                    event.toolTip.add(EnumChatFormatting.GOLD + StatCollector.translateToLocalFormatted("gui.mcitemstats.food.saturation", String.format("%.1f", healAmount * saturationModifier * 2.0F)));
+                if (saturationModifier > 0.0f) {
+                    tooltip.add("\u00A76" + LangUtils.format("gui.mcitemstats.food.saturation", Math.round(healAmount * saturationModifier * 2f * 10f) / 10f));
                 }
             }
 
             if (food.potionId > 0 && food.potionEffectProbability > 0.0F) {
+                if (lastGui == null || !lastGui.equals(FMLClientHandler.instance().getClient().currentScreen)) {
+                    lastGui = FMLClientHandler.instance().getClient().currentScreen;
+                    potionEffectCache.clear();
+                }
+
                 if (!potionEffectCache.containsKey(food)) {
                     potionEffectCache.put(food, new PotionEffect(food.potionId, food.potionDuration * 20, food.potionAmplifier));
                 }
@@ -97,25 +90,12 @@ public class ItemTooltipEventHandler {
                     potionName = potionName + " " + StatCollector.translateToLocal("potion.potency." + potionEffect.getAmplifier()).trim();
                 }
 
-                event.toolTip.add((Potion.potionTypes[food.potionId].isBadEffect() ? EnumChatFormatting.RED : EnumChatFormatting.AQUA) + StatCollector.translateToLocalFormatted("gui.mcitemstats.food.potion", potionName, Potion.getDurationString(potionEffect), Math.round(food.potionEffectProbability * 100.0F)));
-            }
-        }
-
-        if (baublesLoaded && BaublesUtil.isBauble(stack)) {
-            String baubleSlot = BaublesUtil.getBaubleType(stack);
-
-            if (baubleSlot != null) {
-                event.toolTip.add(EnumChatFormatting.GOLD + StatCollector.translateToLocalFormatted("gui.mcitemstats.bauble.slot", StatCollector.translateToLocal("gui.mcitemstats.bauble.type." + baubleSlot.toLowerCase())));
+                tooltip.add("\u00A7" + (Potion.potionTypes[food.potionId].isBadEffect() ? "4" : "b") + LangUtils.format("gui.mcitemstats.food.potion", potionName, Potion.getDurationString(potionEffect), Math.round(food.potionEffectProbability * 100.0F)));
             }
         }
 
         if (stack.isItemStackDamageable()) {
-            event.toolTip.add(EnumChatFormatting.GRAY + StatCollector.translateToLocalFormatted("gui.mcitemstats.durability", stack.getMaxDamage() - stack.getItemDamageForDisplay(), stack.getMaxDamage()));
+            tooltip.add("\u00A77" + LangUtils.format("gui.mcitemstats.durability", stack.getMaxDamage() - stack.getItemDamageForDisplay(), stack.getMaxDamage()));
         }
-    }
-
-    @SubscribeEvent
-    public void onGuiScreenOpen(GuiOpenEvent event) {
-        this.potionEffectCache.clear();
     }
 }
