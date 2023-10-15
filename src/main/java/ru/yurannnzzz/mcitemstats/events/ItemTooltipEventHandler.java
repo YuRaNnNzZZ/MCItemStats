@@ -63,7 +63,7 @@ public class ItemTooltipEventHandler {
             EnumToolMaterial material = EnumToolMaterial.valueOf(tool.getToolMaterialName());
 
             tooltip.add("\u00A72" + LangUtils.format("gui.mcitemstats.harvestlevel", material.getHarvestLevel()));
-            tooltip.add("\u00A72" + LangUtils.format("gui.mcitemstats.harvestspeed", material.getEfficiencyOnProperMaterial()));
+            tooltip.add("\u00A72" + LangUtils.format("gui.mcitemstats.harvestspeed", tool.efficiencyOnProperMaterial));
         }
 
         if (item instanceof ItemFood) {
