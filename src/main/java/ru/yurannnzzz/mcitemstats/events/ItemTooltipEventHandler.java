@@ -12,6 +12,7 @@ import net.minecraft.item.ItemTool;
 import net.minecraft.potion.Potion;
 import net.minecraft.potion.PotionEffect;
 import net.minecraft.util.StatCollector;
+import net.minecraftforge.common.ISpecialArmor;
 import ru.yurannnzzz.mcitemstats.util.LangUtils;
 
 import java.util.ArrayList;
@@ -38,7 +39,13 @@ public class ItemTooltipEventHandler {
         if (item instanceof ItemArmor) {
             ItemArmor armor = (ItemArmor) item;
 
-            int reduction = armor.getArmorMaterial().getDamageReductionAmount(armor.armorType);
+            int reduction = armor.damageReduceAmount;
+
+            if (item instanceof ISpecialArmor) {
+                ISpecialArmor sArmor = (ISpecialArmor) item;
+
+                reduction = sArmor.getArmorDisplay(player, stack, armor.armorType);
+            }
 
             if (reduction > 0) {
                 tooltip.add("\u00A7b" + LangUtils.format("gui.mcitemstats.protection", reduction));
